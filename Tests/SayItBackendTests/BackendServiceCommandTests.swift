@@ -2467,6 +2467,16 @@ private final class ServiceFixture {
             at: directory,
             withIntermediateDirectories: true
         )
+        // The deterministic synthesizer never reads these placeholder weights.
+        // Voice availability still requires files with the catalogued sizes.
+        for file in model.files where file.path.hasPrefix("voices/") {
+            let voiceFile = directory.appending(path: file.path)
+            try FileManager.default.createDirectory(
+                at: voiceFile.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try Data(count: Int(file.byteCount)).write(to: voiceFile)
+        }
         let installation = ModelInstallation(
             modelID: model.id,
             revision: model.revision,
